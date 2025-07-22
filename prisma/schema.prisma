@@ -9,10 +9,86 @@ datasource db {
 }
 
 model Users {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              Int              @id @default(autoincrement())
+  name            String
+  email           String           @unique
+  passwordHash    String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  profilePicUrl   String
+  Invites         Invite[]
+  Votes           Vote[]
+  VoteSubmissions VoteSubmission[]
+}
+
+model Vote {
+  id               Int              @id @default(autoincrement())
+  title            String
+  description      String?
+  category         Category
+  ownerId          Int
+  accessType       AccessType
+  startTime        DateTime
+  endTime          DateTime
+  resultVisibility ResultVisibility
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  Invites          Invite[]
+  Owner            Users            @relation(fields: [ownerId], references: [id])
+  VoteOptions      VoteOption[]
+  VoteSubmissions  VoteSubmission[]
+}
+
+model VoteOption {
+  id      Int     @id @default(autoincrement())
+  voteId  Int
+  label   String
+  order   Int
+  iconUrl String?
+  Vote    Vote    @relation(fields: [voteId], references: [id])
+}
+
+model VoteSubmission {
+  id          Int      @id @default(autoincrement())
+  voteId      Int
+  userId      Int
+  email       String?
+  ipAddress   String?
+  submittedAt DateTime @default(now())
+  Users       Users    @relation(fields: [userId], references: [id])
+  Vote        Vote     @relation(fields: [voteId], references: [id])
+}
+
+model Invite {
+  id        Int      @id @default(autoincrement())
+  voteId    Int
+  userId    Int
+  email     String?
+  token     String
+  hasVoted  Boolean
+  invitedAt DateTime @default(now())
+  User      Users    @relation(fields: [userId], references: [id])
+  Vote      Vote     @relation(fields: [voteId], references: [id])
+}
+
+enum Category {
+  Election
+  Food
+  Places
+  SocialLife
+  Event
+  Game
+  Movies
+  Other
+}
+
+enum AccessType {
+  Public
+  Private
+}
+
+enum ResultVisibility {
+  Always
+  AfterEnd
+  OwnerOnly
 }
